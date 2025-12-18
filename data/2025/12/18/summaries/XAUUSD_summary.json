@@ -1,0 +1,218 @@
+{
+  "pair": "XAUUSD",
+  "schema_version": 2.1,
+  "generated_at": "2025-12-18T16:33:52.248485+09:00",
+  "timeframes": {
+    "1d": {
+      "interval": "1d",
+      "period": "42bars",
+      "trend": "UP",
+      "support_levels": [
+        4040.886,
+        4054.8727
+      ],
+      "resistance_levels": [
+        4390.74,
+        4352.6653
+      ],
+      "rsi": 70.63,
+      "atr": 60.1722,
+      "average_volatility": 64.4204,
+      "data_timestamp": "2025-12-18T16:33:51.383611+09:00",
+      "sma": {
+        "5": {
+          "latest": 4306.3686,
+          "slope": "strong_up",
+          "deviation_pct": 0.0071
+        },
+        "13": {
+          "latest": 4246.6192,
+          "slope": "strong_up"
+        },
+        "21": {
+          "latest": 4201.8638,
+          "slope": "up"
+        },
+        "ordering": "bullish"
+      },
+      "ema": {
+        "25": {
+          "latest": 4198.8202,
+          "reaction": "support_bounce",
+          "reaction_bars_ago": 17
+        },
+        "75": {
+          "latest": 3998.3224,
+          "reaction": "none",
+          "reaction_bars_ago": null
+        },
+        "90": {
+          "latest": 3943.038,
+          "reaction": "none",
+          "reaction_bars_ago": null
+        },
+        "200": {
+          "latest": 3648.2656,
+          "reaction": "none",
+          "reaction_bars_ago": null
+        }
+      },
+      "timeframe": "1d",
+      "time_of_day": null
+    },
+    "4h": {
+      "interval": "4h",
+      "period": "35d",
+      "trend": "UP",
+      "support_levels": [
+        4171.4068
+      ],
+      "resistance_levels": [
+        4352.6653
+      ],
+      "rsi": 61.16,
+      "atr": 23.624,
+      "average_volatility": 27.5295,
+      "data_timestamp": "2025-12-18T16:33:51.449533+09:00",
+      "sma": {
+        "5": {
+          "latest": 4335.5924,
+          "slope": "up",
+          "deviation_pct": 0.0002
+        },
+        "13": {
+          "latest": 4318.8441,
+          "slope": "flat"
+        },
+        "21": {
+          "latest": 4318.3801,
+          "slope": "up"
+        },
+        "ordering": "bullish"
+      },
+      "ema": {
+        "25": {
+          "latest": 4307.683,
+          "reaction": "support_bounce",
+          "reaction_bars_ago": 28
+        },
+        "75": {
+          "latest": 4254.1254,
+          "reaction": "support_bounce",
+          "reaction_bars_ago": 42
+        },
+        "90": {
+          "latest": 4241.4401,
+          "reaction": "none",
+          "reaction_bars_ago": null
+        },
+        "200": {
+          "latest": null,
+          "reaction": "none",
+          "reaction_bars_ago": null
+        }
+      },
+      "timeframe": "4h",
+      "time_of_day": null
+    },
+    "1h": {
+      "interval": "1h",
+      "period": "10d",
+      "trend": "UP",
+      "support_levels": [
+        4206.9467,
+        4273.7223
+      ],
+      "resistance_levels": [
+        4352.6653
+      ],
+      "rsi": 56.35,
+      "atr": 8.1938,
+      "average_volatility": 10.8593,
+      "data_timestamp": "2025-12-18T16:33:51.426044+09:00",
+      "sma": {
+        "5": {
+          "latest": 4333.9469,
+          "slope": "flat",
+          "deviation_pct": 0.0006
+        },
+        "13": {
+          "latest": 4335.7806,
+          "slope": "flat"
+        },
+        "21": {
+          "latest": 4334.4233,
+          "slope": "flat"
+        },
+        "ordering": "mixed"
+      },
+      "ema": {
+        "25": {
+          "latest": 4331.0417,
+          "reaction": "support_bounce",
+          "reaction_bars_ago": 0
+        },
+        "75": {
+          "latest": 4315.8166,
+          "reaction": "support_bounce",
+          "reaction_bars_ago": 42
+        },
+        "90": {
+          "latest": 4310.8491,
+          "reaction": "support_bounce",
+          "reaction_bars_ago": 43
+        },
+        "200": {
+          "latest": 4279.3352,
+          "reaction": "none",
+          "reaction_bars_ago": null
+        }
+      },
+      "timeframe": "1h",
+      "time_of_day": {
+        "reversal_window": {
+          "min": 4,
+          "max": 4
+        },
+        "tod_score": {
+          "00": 0.11,
+          "01": 0.0,
+          "02": 0.0,
+          "03": 0.12,
+          "04": 0.0,
+          "05": 0.0,
+          "06": 0.0,
+          "07": 0.0,
+          "08": 0.38,
+          "09": 0.25,
+          "10": 0.12,
+          "11": 0.0,
+          "12": 0.0,
+          "13": 0.12,
+          "14": 0.0,
+          "15": 0.0,
+          "16": 0.0,
+          "17": 0.0,
+          "18": 0.0,
+          "19": 0.0,
+          "20": 0.0,
+          "21": 0.0,
+          "22": 0.0,
+          "23": 0.11
+        },
+        "method": "fractal-volatility-filtered",
+        "volatility_threshold": 1.5
+      }
+    }
+  },
+  "metadata": {
+    "source_files": [
+      "XAUUSD_1d_200d_analysis.json",
+      "XAUUSD_1h_10d_analysis.json",
+      "XAUUSD_4h_35d_analysis.json"
+    ],
+    "consolidation_version": "1.2.0",
+    "total_timeframes": 3,
+    "missing_timeframes": []
+  }
+}
