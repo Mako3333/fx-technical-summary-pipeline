@@ -27,13 +27,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: 'pip'
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Fetch OHLC CSVs
         env:
@@ -42,7 +45,7 @@ jobs:
           PERIOD_MAP: "1h:10d 4h:35d 1d:200d"
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: |
-          uv run python - <<'PY'
+          python - <<'PY'
           import os
           import sys
           from pathlib import Path
@@ -94,10 +97,10 @@ jobs:
           PY
 
       - name: Run analysis aggregator
-        run: uv run python ohlc_aggregator.py --input-dir ./csv_data --output-dir ./reports --verbose
+        run: python ohlc_aggregator.py --input-dir ./csv_data --output-dir ./reports --verbose
 
       - name: Consolidate analysis summaries
-        run: uv run python consolidate_summaries.py --reports-dir ./reports --output-dir ./summary_reports --verbose
+        run: python consolidate_summaries.py --reports-dir ./reports --output-dir ./summary_reports --verbose
 
       # L2 サマリー JSON (summary_reports/*_summary.json) を JST 日付パーティション付き data/YYYY/MM/DD/summaries/ にコピー
       - name: Set RUN_DATE (JST)
@@ -127,7 +130,7 @@ jobs:
 
       - name: Prepare daily data directory
         run: |
-          uv run python scripts/prepare_daily_data.py --date "$RUN_DATE"
+          python scripts/prepare_daily_data.py --date "$RUN_DATE"
 
       - name: Upload artifacts
         if: always()
