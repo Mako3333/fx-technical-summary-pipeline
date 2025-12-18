@@ -43,5 +43,20 @@ python consolidate_summaries.py --reports-dir ./reports --output-dir ./summary_r
 python scripts/prepare_daily_data.py
 ```
 
+## データフォーマット
+
+生成されるサマリ（`data/YYYY/MM/DD/summaries/{PAIR}_summary.json`）には、以下の情報が含まれます。
+
+- `trend`: 相場の方向性（UP / DOWN / SIDEWAYS）
+- `support_levels` / `resistance_levels`: 直近の主要な水平線（ATRを考慮した高値・安値）
+- `rsi` (14): 売られすぎ・買われすぎの指標
+- `atr` (14): 直近のボラティリティ（値幅）
+- `sma`: 5, 13, 21期間の単純移動平均
+    - `slope`: 傾き（up, flat, down など）
+    - `ordering`: パーフェクトオーダーの判定（bullish, bearish, mixed）
+- `ema`: 25, 75, 90, 200期間の指数平滑移動平均
+    - `reaction`: 直近の反発判定（support_bounce, resistance_reject など）
+- `time_of_day` (1hのみ): 時間帯ごとのリバーサル（反転）発生スコア
+
 ## ライセンス
 MIT License
