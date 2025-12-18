@@ -23,4 +23,15 @@ venv/
 *.log
 
 # Data artifacts (generated files)
-data/
+csv_data/
+reports/
+summary_reports/
+
+# Python Build
+*.egg-info/
+build/
+dist/
+
+# Project Data
+# data/ はリポジトリで管理するためコメントアウト、または個別に指定
+# data/

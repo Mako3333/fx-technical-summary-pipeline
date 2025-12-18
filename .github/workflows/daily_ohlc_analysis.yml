@@ -1,0 +1,150 @@
+name: Daily OHLC Analysis
+# no-op to refresh workflow_dispatch
+
+# このワークフローは以下を行う:
+# - トリガー: 平日 07:05 JST の schedule と手動 workflow_dispatch で起動
+# - ジョブ: 「Fetch OHLC CSVs」「Run analysis aggregator」「Consolidate analysis summaries」で
+#   summary_reports/*_summary.json を生成
+# - アーティファクト: 最後に Upload artifacts ステップで CSV/分析結果/summary_reports を Actions Artifact に保存
+
+on:
+  schedule:
+    # 07:05 JST == 22:05 UTC (previous day), Monday-Friday only
+    - cron: "5 22 * * 0-4"
+  workflow_dispatch:
+
+permissions:
+  # CSV/レポート生成に加えて data/ 配下へのコミットと PR 作成を行うため write 権限を付与
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  fetch-and-analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Fetch OHLC CSVs
+        env:
+          PAIRS: "USDJPY EURUSD AUDJPY AUDUSD EURJPY XAUUSD"
+          INTERVALS: "1h 4h 1d"
+          PERIOD_MAP: "1h:10d 4h:35d 1d:200d"
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+        run: |
+          uv run python - <<'PY'
+          import os
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path.cwd() / "src"))
+
+          from fx_kline.core import OHLCRequest, export_to_csv, fetch_batch_ohlc_sync  # type: ignore
+
+          pairs = os.environ["PAIRS"].split()
+          intervals = os.environ["INTERVALS"].split()
+          period_map_str = os.environ["PERIOD_MAP"]
+
+          period_map = {}
+          for item in period_map_str.split():
+              if ":" not in item:
+                  continue
+              key, val = item.split(":", 1)
+              period_map[key.strip()] = val.strip()
+
+          missing = [i for i in intervals if i not in period_map]
+          if missing:
+              raise SystemExit(f"Missing period mapping for intervals: {', '.join(missing)}")
+
+          requests = [
+              OHLCRequest(pair=p, interval=i, period=period_map[i])
+              for p in pairs
+              for i in intervals
+          ]
+
+          response = fetch_batch_ohlc_sync(requests)
+
+          csv_dir = Path("csv_data")
+          csv_dir.mkdir(parents=True, exist_ok=True)
+
+          success = 0
+          for ohlc in response.successful:
+              out_path = csv_dir / f"{ohlc.pair}_{ohlc.interval}_{ohlc.period}.csv"
+              out_path.write_text(export_to_csv(ohlc), encoding="utf-8")
+              success += 1
+              print(f"[OK] {out_path.name} rows={ohlc.data_count}")
+
+          for err in response.failed:
+              print(f"[ERR] {err.pair}_{err.interval}_{err.period}: {err.error_type} -> {err.error_message}")
+
+          if response.failed:
+              raise SystemExit(f"Failed {len(response.failed)} fetch(es) out of {response.total_requested}")
+
+          print(f"Fetched CSVs: {success}/{response.total_requested}")
+          PY
+
+      - name: Run analysis aggregator
+        run: uv run python ohlc_aggregator.py --input-dir ./csv_data --output-dir ./reports --verbose
+
+      - name: Consolidate analysis summaries
+        run: uv run python consolidate_summaries.py --reports-dir ./reports --output-dir ./summary_reports --verbose
+
+      # L2 サマリー JSON (summary_reports/*_summary.json) を JST 日付パーティション付き data/YYYY/MM/DD/summaries/ にコピー
+      - name: Set RUN_DATE (JST)
+        run: |
+          TZ=Asia/Tokyo
+          echo "RUN_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)" >> "$GITHUB_ENV"
+
+      # 評価対象日の設定
+      # 月曜日(1)の朝実行時は、土日を飛ばして「金曜日(3日前)」をターゲットにする
+      # 火～金は、そのまま「昨日」をターゲットにする
+      - name: Set TARGET_DATE (Adjust for Weekend)
+        run: |
+          CURRENT_DAY=$(TZ=Asia/Tokyo date +%u)
+          if [ "$CURRENT_DAY" -eq 1 ]; then
+            # Monday -> Target Friday (3 days ago)
+            echo "TARGET_DATE=$(TZ=Asia/Tokyo date -d '3 days ago' +%Y-%m-%d)" >> "$GITHUB_ENV"
+          else
+            # Tue-Fri -> Target Yesterday (1 day ago)
+            echo "TARGET_DATE=$(TZ=Asia/Tokyo date -d 'yesterday' +%Y-%m-%d)" >> "$GITHUB_ENV"
+          fi
+
+      # data/YYYY/MM/DD 形式のパス用
+      - name: Set TARGET_DATE_PATH (YYYY/MM/DD)
+        run: |
+          DATE_PATH=$(echo "$TARGET_DATE" | tr '-' '/')
+          echo "TARGET_DATE_PATH=$DATE_PATH" >> "$GITHUB_ENV"
+
+      - name: Prepare daily data directory
+        run: |
+          uv run python scripts/prepare_daily_data.py --date "$RUN_DATE"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ohlc-daily-${{ github.run_id }}
+          path: |
+            csv_data/**/*.csv
+            reports/**/*.json
+            summary_reports/**/*.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      # data/YYYY/MM/DD/summaries/*.json を含む data/ 配下の変更を直接 main ブランチにコミット (Forkユーザー向けにシンプル化)
+      - name: Commit and Push daily data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet || (git commit -m "chore: add daily summaries for ${{ env.RUN_DATE }}" && git push)

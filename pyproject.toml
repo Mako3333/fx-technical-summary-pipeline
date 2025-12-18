@@ -30,6 +30,10 @@ dependencies = [
     "pytz",
     "yfinance",
     "pydantic>=2.0.0",
+    "PyYAML",
+    "python-dotenv",
+    "numpy",
+    "scipy",
 ]
 
 [project.optional-dependencies]
