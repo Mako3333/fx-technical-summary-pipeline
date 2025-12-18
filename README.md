@@ -1,6 +1,9 @@
 # FX Technical Summary Pipeline
 
-このリポジトリは、FX/CFD の OHLC データを日次で取得し、テクニカル分析サマリ（JSON）を自動生成するためのパイプラインです。  
+このリポジトリは、FX/CFD の OHLC データを日次で取得し、テクニカル分析サマリ（JSON）を自動生成するためのパイプラインです。 
+
+この情報をLLMに渡すことで分析の精度を高めることができます。
+
 GitHub Actions を利用して、毎日最新の市場状況を `data/` ディレクトリに蓄積します。
 
 ## 主な機能
@@ -43,6 +46,25 @@ python consolidate_summaries.py --reports-dir ./reports --output-dir ./summary_r
 python scripts/prepare_daily_data.py
 ```
 
+## 銘柄の追加・変更方法
+
+取得する通貨ペアを増やしたい場合（例：ポンド円 `GBPJPY` を追加するなど）は、以下の箇所を編集してください。
+
+### 1. GitHub Actions（自動実行）の設定
+`.github/workflows/daily_ohlc_analysis.yml` の 40行目付近にある `PAIRS` を書き換えます。
+```yaml
+env:
+  PAIRS: "USDJPY EURUSD GBPJPY ..."  # スペース区切りで追加
+```
+
+### 2. ローカル実行の設定
+`scripts/fetch_daily_data_local.py` の 26行目付近にある `PAIRS` リストに銘柄を追加します。
+```python
+PAIRS = ["USDJPY", "EURUSD", "GBPJPY", ...]
+```
+
+※ 銘柄名は `yfinance` のシンボル（例: `GBPJPY=X` または `GBPJPY`）に準拠します。
+
 ## データフォーマット
 
 生成されるサマリ（`data/YYYY/MM/DD/summaries/{PAIR}_summary.json`）には、以下の情報が含まれます。
@@ -60,3 +82,5 @@ python scripts/prepare_daily_data.py
 
 ## ライセンス
 MIT License
+
+＊本ソフトウェアの使用による投資損失について、作者は一切の責任を負いません。投資は自己責任で行ってください
