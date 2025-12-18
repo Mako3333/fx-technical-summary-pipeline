@@ -1,7 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "fx-technical-summary-pipeline"
 version = "0.1.0"
-description = "Add your description here"
+description = "FX technical summary pipeline for processing and analyzing foreign exchange data"
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = []
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Mako3333"}
+]
+keywords = ["fx", "finance", "technical-analysis", "data-pipeline", "yfinance"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience ::  Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language ::  Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+# 必須の外部依存関係
+dependencies = [
+    "pandas>=2.0.0",
+    "pytz",
+    "yfinance",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+# 開発用の依存関係（オプション）
+dev = [
+    "pytest",
+    "black",
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/Mako3333/fx-technical-summary-pipeline"
+Repository = "https://github.com/Mako3333/fx-technical-summary-pipeline"
+Issues = "https://github.com/Mako3333/fx-technical-summary-pipeline/issues"
+
+[tool.setuptools]
+packages = ["fx_kline"]
+package-dir = {"" = "src"}
